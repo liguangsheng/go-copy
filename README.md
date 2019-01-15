@@ -29,3 +29,5 @@ func main() {
 - more descriptor
 - more unit test
 - support slice
+- use lru cache instead map cache
+- optimize to improve speed
