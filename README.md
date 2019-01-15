@@ -26,6 +26,7 @@ func main() {
 ```
 
 # TODO
+- parse struct field with tag
 - more descriptor
 - more unit test
 - support slice
