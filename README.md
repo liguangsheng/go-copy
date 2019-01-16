@@ -7,21 +7,106 @@ go-copy provides object to object copy for golang.
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 
-    "github.com/liguangsheng/go-copy"
+	"github.com/liguangsheng/go-copy"
 )
 
 func main() {
-    var src = time.Now()
-    var dst int64 = 0
-    cpr := copy.NewCopier()
-    cpr.Register(copy.TypeInt64.RType(), copy.TypeTime.RType(), &copy.TimeToInt64Descriptor{})
-    if err := cpr.Copy(&dst, src); err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println(dst) // 1547545588
+	var src = struct {
+		Field1 time.Time
+		Field2 int64
+	}{
+		Field1: time.Now(),
+		Field2: time.Now().Unix(),
+	}
+	var dst struct {
+		Field1 int64
+		Field2 time.Time
+	}
+	if err := copy.Copy(&dst, src); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(src) // {2019-01-16 17:18:06.646149 +0800 CST m=+0.001120925 1547630286}
+		fmt.Println(dst) // {1547630286 2019-01-16 17:18:06 +0800 CST}
+	}
+}
+```
+
+You can add your custom descriptor to support more type.
+```go
+package main
+
+import (
+	"fmt"
+	"unsafe"
+
+	"github.com/modern-go/reflect2"
+
+	"github.com/liguangsheng/go-copy"
+)
+
+type IntToStringDescriptor struct{}
+
+func (d IntToStringDescriptor) SrcType() reflect2.Type {
+	return reflect2.TypeOf(int(0))
+}
+
+func (d IntToStringDescriptor) DstType() reflect2.Type {
+	return reflect2.TypeOf("hahaha")
+}
+
+func (d IntToStringDescriptor) Copy(dstType, srcType reflect2.Type, dstPtr, srcPtr unsafe.Pointer) {
+	val := *(srcType.PackEFace(srcPtr).(*int))
+	str := fmt.Sprintf("%d", val)
+	dstType.UnsafeSet(dstPtr, reflect2.PtrOf(str))
+}
+
+func main() {
+	var src int = 42
+	var dst string
+	copier := copy.NewCopier()
+	copier.Register(IntToStringDescriptor{})
+	if err := copier.Copy(&dst, src); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(src) // 42
+		fmt.Println(dst) // 42
+	}
+}
+```
+
+Use different field parser
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/liguangsheng/go-copy"
+)
+
+func main() {
+	var src = struct {
+		Field1 int `copy:"copy_to_field2"`
+		Field2 int `copy:"copy_to_field1"`
+	}{
+		Field1: 111,
+		Field2: 222,
+	}
+	var dst struct {
+		Field1 int `copy:"copy_to_field1"`
+		Field2 int `copy:"copy_to_field2"`
+	}
+	copier := copy.NewCopier()
+	copier.UseFieldParser(copy.ParseFieldByCopyTag)
+	if err := copier.Copy(&dst, src); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(src) // {111 222}
+		fmt.Println(dst) // {222 111}
+	}
 }
 ```
 

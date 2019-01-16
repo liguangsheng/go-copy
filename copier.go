@@ -12,12 +12,14 @@ import (
 type Copier = *copier
 
 type copier struct {
-	cache map[string]Descriptor
+	cache       map[string]Descriptor
+	fieldParser FieldParser
 }
 
 func NewCopier(descriptors ...CustomDescriptor) *copier {
 	c := &copier{
-		cache: make(map[string]Descriptor),
+		cache:       make(map[string]Descriptor),
+		fieldParser: ParseFiledByName,
 	}
 	for _, d := range DefaultDescriptors() {
 		c.Register(d)
@@ -32,6 +34,11 @@ func NewCopier(descriptors ...CustomDescriptor) *copier {
 func (c *copier) Register(descriptor CustomDescriptor) {
 	cacheKey := c.cacheKey(descriptor.DstType().RType(), descriptor.SrcType().RType())
 	c.cache[cacheKey] = descriptor
+}
+
+// UseFieldParser change field parser
+func (c *copier) UseFieldParser(parser FieldParser) {
+	c.fieldParser = parser
 }
 
 func (c *copier) Copy(dst, src interface{}) error {
@@ -116,12 +123,18 @@ func (c *copier) describeStruct(dstType, srcType reflect2.Type) *structDescripto
 
 	dstFields := make(map[string]reflect.StructField)
 	for _, field := range deepFields(dstType.Type1()) {
-		dstFields[parseFiledName(field)] = field
+		name := c.fieldParser(field)
+		if name != "" {
+			dstFields[name] = field
+		}
 	}
 
 	srcFields := make(map[string]reflect.StructField)
 	for _, field := range deepFields(srcType.Type1()) {
-		srcFields[parseFiledName(field)] = field
+		name := c.fieldParser(field)
+		if name != "" {
+			srcFields[name] = field
+		}
 	}
 
 	for name, dstField := range dstFields {

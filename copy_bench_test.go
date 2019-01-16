@@ -1,9 +1,10 @@
 package copy
 
 import (
-	"github.com/ulule/deepcopier"
 	"testing"
 	"time"
+
+	"github.com/ulule/deepcopier"
 
 	jinzhu_copier "github.com/jinzhu/copier"
 )
@@ -60,8 +61,6 @@ func BenchmarkCopySmall(b *testing.B) {
 		cpr.Copy(&dst, src)
 	}
 }
-
-
 
 type TestStructMediumA struct {
 	Field1  int

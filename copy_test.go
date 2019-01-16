@@ -7,40 +7,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestStringToString(t *testing.T) {
+	var src = "sudo i love you"
+	var dst = "i love you"
+	assert.NoError(t, Copy(&dst, src))
+	assert.Equal(t, "sudo i love you", dst)
+}
+
 func TestInt64ToInt64(t *testing.T) {
 	var src int64 = 64
 	var dst int64 = 0
-	NewCopier().Copy(&dst, src)
+	assert.NoError(t, Copy(&dst, src))
 	assert.Equal(t, int64(64), dst)
 }
 
 func TestTimeToInt64(t *testing.T) {
 	var src = time.Now()
 	var dst int64 = 0
-	cpr := NewCopier()
-	assert.NoError(t, cpr.Copy(&dst, src))
+	assert.NoError(t, Copy(&dst, src))
 	assert.Equal(t, src.Unix(), dst)
 }
 
-//func TestInt64ToFloat64(t *testing.T) {
-//	var src int64 = 64
-//	var dst float64 = 0
-//	Copy(&dst, src)
-//	assert.Equal(t, float64(64.0), dst)
-//}
-//
-//func TestFloat64ToInt64(t *testing.T) {
-//	var src float64 = 3.1415
-//	var dst int64 = 0
-//	Copy(&dst, src)
-//	assert.Equal(t, int64(3), dst)
-//}
-
-func TestStringToString(t *testing.T) {
-	var src = "sudo i love you"
-	var dst = "i love you"
-	Copy(&dst, src)
-	assert.Equal(t, "sudo i love you", dst)
+func TestInt64ToTime(t *testing.T) {
+	var src = time.Now().Unix()
+	var dst time.Time
+	assert.NoError(t, Copy(&dst, src))
+	assert.Equal(t, src, dst.Unix())
 }
 
 func TestStructToStruct(t *testing.T) {

@@ -45,7 +45,3 @@ func indirectValue(val reflect.Value) reflect.Value {
 	}
 	return val
 }
-
-func parseFiledName(field reflect.StructField) string {
-	return field.Name
-}

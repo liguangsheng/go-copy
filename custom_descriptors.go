@@ -1,9 +1,10 @@
 package copy
 
 import (
-	"github.com/modern-go/reflect2"
 	"time"
 	"unsafe"
+
+	"github.com/modern-go/reflect2"
 )
 
 type CustomDescriptor interface {
