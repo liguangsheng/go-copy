@@ -18,7 +18,6 @@ func TestTimeToInt64(t *testing.T) {
 	var src = time.Now()
 	var dst int64 = 0
 	cpr := NewCopier()
-	cpr.Register(TypeInt64.RType(), TypeTime.RType(), &TimeToInt64Descriptor{})
 	assert.NoError(t, cpr.Copy(&dst, src))
 	assert.Equal(t, src.Unix(), dst)
 }
@@ -67,7 +66,6 @@ func TestStructToStruct(t *testing.T) {
 		Field5 int64
 	}
 	cpr := NewCopier()
-	cpr.Register(TypeInt64.RType(), TypeTime.RType(), &TimeToInt64Descriptor{})
 	assert.NoError(t, cpr.Copy(&dst, src))
 	assert.Equal(t, int(1), dst.Field1)
 	assert.Equal(t, "you are a good guy", dst.Field2)

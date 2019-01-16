@@ -53,7 +53,6 @@ func BenchmarkCopySmall(b *testing.B) {
 	var src = TestStructSmallA{}
 	var dst TestStructSmallB
 	cpr := NewCopier()
-	cpr.Register(TypeInt64.RType(), TypeTime.RType(), &TimeToInt64Descriptor{})
 	cpr.Copy(&dst, src)
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -123,7 +122,6 @@ func BenchmarkCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dst TestStructMediumB
 	cpr := NewCopier()
-	cpr.Register(TypeInt64.RType(), TypeTime.RType(), &TimeToInt64Descriptor{})
 	cpr.Copy(&dst, src)
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -371,7 +369,6 @@ func BenchmarkCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
 	cpr := NewCopier()
-	cpr.Register(TypeInt64.RType(), TypeTime.RType(), &TimeToInt64Descriptor{})
 	cpr.Copy(&dst, src)
 	b.ResetTimer()
 	b.ReportAllocs()

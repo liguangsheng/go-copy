@@ -15,14 +15,22 @@ type copier struct {
 	cache map[string]Descriptor
 }
 
-func NewCopier() *copier {
-	return &copier{
+func NewCopier(descriptors ...CustomDescriptor) *copier {
+	c := &copier{
 		cache: make(map[string]Descriptor),
 	}
+	for _, d := range DefaultDescriptors() {
+		c.Register(d)
+	}
+	for _, d := range descriptors {
+		c.Register(d)
+	}
+	return c
 }
 
-func (c *copier) Register(dst, src uintptr, descriptor Descriptor) {
-	cacheKey := c.cacheKey(dst, src)
+// Register add descriptor to cache
+func (c *copier) Register(descriptor CustomDescriptor) {
+	cacheKey := c.cacheKey(descriptor.DstType().RType(), descriptor.SrcType().RType())
 	c.cache[cacheKey] = descriptor
 }
 
@@ -58,7 +66,7 @@ func (c *copier) copy(dstType, srcType reflect2.Type, dstPtr, srcPtr unsafe.Poin
 			c.copy(i.DstType, i.SrcType, unsafe.Pointer(i.DstOffset+uintptr(dstPtr)), unsafe.Pointer(i.SrcOffset+uintptr(srcPtr)))
 		}
 	} else {
-		descriptor.Copy(unsafe.Pointer(dstPtr), unsafe.Pointer(srcPtr))
+		descriptor.Copy(dstType, srcType, unsafe.Pointer(dstPtr), unsafe.Pointer(srcPtr))
 	}
 
 	return nil
@@ -119,7 +127,7 @@ func (c *copier) describeStruct(dstType, srcType reflect2.Type) *structDescripto
 	for name, dstField := range dstFields {
 		if srcField, ok := srcFields[name]; ok {
 			c.describe(reflect2.Type2(dstField.Type), reflect2.Type2(srcField.Type))
-			sd.FieldDescriptors = append(sd.FieldDescriptors, StructFieldDescriptor{
+			sd.FieldDescriptors = append(sd.FieldDescriptors, structFieldDescriptor{
 				DstType:   reflect2.Type2(dstField.Type),
 				SrcType:   reflect2.Type2(srcField.Type),
 				DstOffset: dstField.Offset,
