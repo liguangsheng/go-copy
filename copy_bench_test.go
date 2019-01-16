@@ -1,6 +1,7 @@
 package copy
 
 import (
+	"github.com/ulule/deepcopier"
 	"testing"
 	"time"
 
@@ -28,6 +29,16 @@ func BenchmarkJinzhuCopySmall(b *testing.B) {
 	}
 }
 
+func BenchmarkDeepCopySmall(b *testing.B) {
+	var src = TestStructSmallA{}
+	var dst TestStructSmallB
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		deepcopier.Copy(src).To(&dst)
+	}
+}
+
 func BenchmarkJSONCopySmall(b *testing.B) {
 	var src = TestStructSmallA{}
 	var dst TestStructSmallB
@@ -50,6 +61,8 @@ func BenchmarkCopySmall(b *testing.B) {
 		cpr.Copy(&dst, src)
 	}
 }
+
+
 
 type TestStructMediumA struct {
 	Field1  int
@@ -83,6 +96,16 @@ func BenchmarkJinzhuCopyMedium(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		jinzhu_copier.Copy(&dst, src)
+	}
+}
+
+func BenchmarkDeepCopyMedium(b *testing.B) {
+	var src = TestStructMediumA{}
+	var dst TestStructMediumB
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		deepcopier.Copy(src).To(&dst)
 	}
 }
 
@@ -321,6 +344,16 @@ func BenchmarkJinzhuCopyBig(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		jinzhu_copier.Copy(&dst, src)
+	}
+}
+
+func BenchmarkDeepCopyBig(b *testing.B) {
+	var src = TestStructBigA{}
+	var dst TestStructBigB
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		deepcopier.Copy(src).To(&dst)
 	}
 }
 
