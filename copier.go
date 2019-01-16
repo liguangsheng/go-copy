@@ -16,7 +16,7 @@ type copier struct {
 	fieldParser FieldParser
 }
 
-func NewCopier(descriptors ...CustomDescriptor) *copier {
+func NewCopier() *copier {
 	c := &copier{
 		cache:       make(map[string]Descriptor),
 		fieldParser: ParseFiledByName,
@@ -24,16 +24,15 @@ func NewCopier(descriptors ...CustomDescriptor) *copier {
 	for _, d := range DefaultDescriptors() {
 		c.Register(d)
 	}
-	for _, d := range descriptors {
-		c.Register(d)
-	}
 	return c
 }
 
 // Register add descriptor to cache
-func (c *copier) Register(descriptor CustomDescriptor) {
-	cacheKey := c.cacheKey(descriptor.DstType().RType(), descriptor.SrcType().RType())
-	c.cache[cacheKey] = descriptor
+func (c *copier) Register(descriptors ...CustomDescriptor) {
+	for _, descriptor := range descriptors {
+		cacheKey := c.cacheKey(descriptor.DstType().RType(), descriptor.SrcType().RType())
+		c.cache[cacheKey] = descriptor
+	}
 }
 
 // UseFieldParser change field parser
