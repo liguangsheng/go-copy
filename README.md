@@ -1,6 +1,6 @@
 # go-copy
 
-go-copy provides object to object copy for golang.
+fast copy struct to struct for golang.
 
 # example
 ```go
@@ -40,24 +40,21 @@ package main
 
 import (
 	"fmt"
-	"unsafe"
-
-	"github.com/modern-go/reflect2"
-
 	"github.com/liguangsheng/go-copy"
+	"github.com/modern-go/reflect2"
+	"unsafe"
 )
 
-type IntToStringDescriptor struct{}
+type IntToStringCopier struct{}
 
-func (d IntToStringDescriptor) SrcType() reflect2.Type {
-	return reflect2.TypeOf(int(0))
+func (d *IntToStringCopier) Pairs() []copy.TypePair {
+	return []copy.TypePair{{
+		SrcType: reflect2.TypeOf(int(0)).RType(),
+		DstType: reflect2.TypeOf("").RType(),
+	}}
 }
 
-func (d IntToStringDescriptor) DstType() reflect2.Type {
-	return reflect2.TypeOf("hahaha")
-}
-
-func (d IntToStringDescriptor) Copy(dstType, srcType reflect2.Type, dstPtr, srcPtr unsafe.Pointer) {
+func (d *IntToStringCopier) Copy(dstType, srcType reflect2.Type, dstPtr, srcPtr unsafe.Pointer) {
 	val := *(srcType.PackEFace(srcPtr).(*int))
 	str := fmt.Sprintf("%d", val)
 	dstType.UnsafeSet(dstPtr, reflect2.PtrOf(str))
@@ -67,7 +64,7 @@ func main() {
 	var src int = 42
 	var dst string
 	copier := copy.NewCopier()
-	copier.Register(IntToStringDescriptor{})
+	copier.Register(&IntToStringCopier{})
 	if err := copier.Copy(&dst, src); err != nil {
 		fmt.Println(err)
 	} else {
@@ -98,8 +95,7 @@ func main() {
 		Field1 int `copy:"copy_to_field1"`
 		Field2 int `copy:"copy_to_field2"`
 	}
-	copier := copy.NewCopier()
-	copier.UseFieldParser(copy.ParseFieldByCopyTag)
+	copier := copy.NewCopier(copy.WithParseFunc(copy.ParseFieldByCopyTag))
 	if err := copier.Copy(&dst, src); err != nil {
 		fmt.Println(err)
 	} else {
@@ -111,30 +107,26 @@ func main() {
 
 # benchmark
 ```
-➜  go-copy git:(master) ✗ go test -bench=. -benchtime=3s -benchmem
-goos: darwin
+λ go test -bench=. -benchmem
+goos: windows
 goarch: amd64
-pkg: github.com/liguangsheng/go-copy
-BenchmarkJinzhuCopySmall-4    	 2000000	      3506 ns/op	    1616 B/op	      21 allocs/op
-BenchmarkDeepCopySmall-4      	 1000000	      5497 ns/op	    2520 B/op	      49 allocs/op
-BenchmarkJSONCopySmall-4      	 5000000	      1228 ns/op	     104 B/op	       5 allocs/op
-BenchmarkCopySmall-4(this repo)	 2000000	      1816 ns/op	     224 B/op	      13 allocs/op
-BenchmarkJinzhuCopyMedium-4   	  500000	     11583 ns/op	    7320 B/op	      58 allocs/op
-BenchmarkDeepCopyMedium-4     	  100000	     37363 ns/op	   21672 B/op	     331 allocs/op
-BenchmarkJSONCopyMedium-4     	 1000000	      4098 ns/op	     472 B/op	      17 allocs/op
-BenchmarkCopyMedium-4(this repo) 1000000	      3865 ns/op	     624 B/op	      34 allocs/op
-BenchmarkJinzhuCopyBig-4      	   30000	    137160 ns/op	   68848 B/op	     487 allocs/op
-BenchmarkDeepCopyBig-4        	    2000	   2409910 ns/op	 1907778 B/op	   25759 allocs/op
-BenchmarkJSONCopyBig-4        	  100000	     35770 ns/op	    4759 B/op	     152 allocs/op
-BenchmarkCopyBig-4(this repo)     200000	     32842 ns/op	    5745 B/op	     304 allocs/op
+pkg: github.com/liguangsheng/go-copy/_benchmark
+BenchmarkJinzhuCopyBig-8           10000            101620 ns/op           68848 B/op        487 allocs/op
+BenchmarkDeepCopyBig-8              1000           1848412 ns/op         1907780 B/op      25759 allocs/op
+BenchmarkJSONCopyBig-8             50000             27703 ns/op            4758 B/op        152 allocs/op
+BenchmarkCopyBig-8                200000             11964 ns/op            2512 B/op        102 allocs/op (this repo)
+BenchmarkJinzhuCopyMedium-8       200000              6971 ns/op            7320 B/op         58 allocs/op
+BenchmarkDeepCopyMedium-8          50000             26620 ns/op           21672 B/op        331 allocs/op
+BenchmarkJSONCopyMedium-8         500000              2817 ns/op             472 B/op         17 allocs/op
+BenchmarkCopyMedium-8            1000000              1453 ns/op             272 B/op         12 allocs/op (this repo)
+BenchmarkJinzhuCopySmall-8       1000000              2090 ns/op            1616 B/op         21 allocs/op
+BenchmarkDeepCopySmall-8          300000              3816 ns/op            2520 B/op         49 allocs/op
+BenchmarkJSONCopySmall-8         2000000               814 ns/op             104 B/op          5 allocs/op
+BenchmarkCopySmall-8             3000000               586 ns/op              96 B/op          5 allocs/op (this repo)
 PASS
-ok  	github.com/liguangsheng/go-copy	71.753s
+ok      github.com/liguangsheng/go-copy/_benchmark      21.368s                                        
 ```
 
 # TODO
-- parse struct field with tag
 - more descriptor
 - more unit test
-- support slice
-- use lru cache instead map cache
-- optimize to improve speed
