@@ -2,8 +2,6 @@ package copy
 
 import (
 	"reflect"
-
-	"github.com/modern-go/reflect2"
 )
 
 func deepFields(typ reflect.Type) []reflect.StructField {
@@ -21,27 +19,9 @@ func deepFields(typ reflect.Type) []reflect.StructField {
 	return fields
 }
 
-func indirect(o interface{}) interface{} {
-	for {
-		typ := reflect2.TypeOf(o)
-		if typ.Kind() == reflect.Ptr {
-			o = typ.Indirect(o)
-			return indirect(o)
-		}
-		return o
-	}
-}
-
 func indirectType(typ reflect.Type) reflect.Type {
 	for typ.Kind() == reflect.Ptr || typ.Kind() == reflect.Slice {
 		typ = typ.Elem()
 	}
 	return typ
-}
-
-func indirectValue(val reflect.Value) reflect.Value {
-	for val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-	return val
 }

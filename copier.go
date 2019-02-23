@@ -2,42 +2,46 @@ package copy
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"unsafe"
 
+	"github.com/liguangsheng/go-cache"
 	"github.com/modern-go/reflect2"
 )
 
 type Copier = *copier
 
 type copier struct {
-	cache       map[string]Descriptor
-	fieldParser FieldParser
+	cacheSize   int
+	typeCache   cache.Cache
+	fieldParser FieldParseFunc
 }
 
-func NewCopier() *copier {
+func NewCopier(opts ...Option) *copier {
 	c := &copier{
-		cache:       make(map[string]Descriptor),
+		typeCache:   cache.New(),
 		fieldParser: ParseFiledByName,
 	}
-	for _, d := range DefaultDescriptors() {
-		c.Register(d)
+
+	for _, opt := range opts {
+		opt(c)
 	}
+
+	c.Register(
+		TimeToInt64Copier{},
+		Int64ToTimeCopier{},
+	)
+
 	return c
 }
 
-// Register add descriptor to cache
-func (c *copier) Register(descriptors ...CustomDescriptor) {
-	for _, descriptor := range descriptors {
-		cacheKey := c.cacheKey(descriptor.DstType().RType(), descriptor.SrcType().RType())
-		c.cache[cacheKey] = descriptor
+// Register add typed copier to cache
+func (c *copier) Register(copiers ...TypedCopier) {
+	for _, co := range copiers {
+		for _, pair := range co.Pairs() {
+			c.typeCache.Set(pair, co)
+		}
 	}
-}
-
-// UseFieldParser change field parser
-func (c *copier) UseFieldParser(parser FieldParser) {
-	c.fieldParser = parser
 }
 
 func (c *copier) Copy(dst, src interface{}) error {
@@ -54,63 +58,53 @@ func (c *copier) Copy(dst, src interface{}) error {
 }
 
 func (c *copier) copy(dstType, srcType reflect2.Type, dstPtr, srcPtr unsafe.Pointer) error {
-	var (
-		dstRType = dstType.RType()
-		srcRType = srcType.RType()
-		cacheKey = c.cacheKey(dstRType, srcRType)
-	)
-	descriptor, ok := c.cache[cacheKey]
-	if !ok {
-		descriptor = c.describe(dstType, srcType)
-		if descriptor == nil {
-			return errors.New("unsupported copy")
-		}
+	cpr := c.parse(dstType, srcType)
+	if cpr == nil {
+		return errors.New("unsupported copy")
 	}
 
-	if sd, ok := descriptor.(*structDescriptor); ok {
-		for _, i := range sd.FieldDescriptors {
+	switch cpr.(type) {
+	case *assignCopier:
+		cpr.(*assignCopier).Copy(dstType, srcType, dstPtr, srcPtr)
+	case *structDescriptor:
+		for _, i := range cpr.(*structDescriptor).FieldDescriptors {
 			c.copy(i.DstType, i.SrcType, unsafe.Pointer(i.DstOffset+uintptr(dstPtr)), unsafe.Pointer(i.SrcOffset+uintptr(srcPtr)))
 		}
-	} else {
-		descriptor.Copy(dstType, srcType, unsafe.Pointer(dstPtr), unsafe.Pointer(srcPtr))
+	default:
+		cpr.(TypedCopier).Copy(dstType, srcType, dstPtr, srcPtr)
+	}
+	return nil
+}
+
+func (c *copier) parse(dstType, srcType reflect2.Type) interface{} {
+	pair := TypePair{
+		DstType: dstType.RType(),
+		SrcType: srcType.RType(),
+	}
+
+	if cpr, ok := c.typeCache.Get(pair); ok {
+		return cpr
+	}
+
+	if d := c.parseAssignable(dstType, srcType); d != nil {
+		return c.save(pair, d)
+	}
+
+	if d := c.parseStructs(dstType, srcType); d != nil {
+		return c.save(pair, d)
 	}
 
 	return nil
 }
 
-func (c *copier) describe(dstType, srcType reflect2.Type) Descriptor {
-	var (
-		dstRType = dstType.RType()
-		srcRType = srcType.RType()
-		cacheKey = c.cacheKey(dstRType, srcRType)
-	)
-
-	if des, ok := c.cache[cacheKey]; ok {
-		return des
-	}
-
-	if d := c.describeAssignable(dstType, srcType); d != nil {
-		return c.saveDescriptor(cacheKey, d)
-	}
-
-	if d := c.describeStruct(dstType, srcType); d != nil {
-		return c.saveDescriptor(cacheKey, d)
-	}
-
-	return nil
-}
-
-func (c *copier) describeAssignable(dstType, srcType reflect2.Type) *assignableDescriptor {
+func (c *copier) parseAssignable(dstType, srcType reflect2.Type) *assignCopier {
 	if dstType.AssignableTo(srcType) {
-		return &assignableDescriptor{
-			DstType: dstType,
-			SrcType: srcType,
-		}
+		return &assignCopier{}
 	}
 	return nil
 }
 
-func (c *copier) describeStruct(dstType, srcType reflect2.Type) *structDescriptor {
+func (c *copier) parseStructs(dstType, srcType reflect2.Type) *structDescriptor {
 	if dstType.Kind() != reflect.Struct || srcType.Kind() != reflect.Struct {
 		return nil
 	}
@@ -138,7 +132,7 @@ func (c *copier) describeStruct(dstType, srcType reflect2.Type) *structDescripto
 
 	for name, dstField := range dstFields {
 		if srcField, ok := srcFields[name]; ok {
-			c.describe(reflect2.Type2(dstField.Type), reflect2.Type2(srcField.Type))
+			c.parse(reflect2.Type2(dstField.Type), reflect2.Type2(srcField.Type))
 			sd.FieldDescriptors = append(sd.FieldDescriptors, structFieldDescriptor{
 				DstType:   reflect2.Type2(dstField.Type),
 				SrcType:   reflect2.Type2(srcField.Type),
@@ -151,13 +145,9 @@ func (c *copier) describeStruct(dstType, srcType reflect2.Type) *structDescripto
 	return sd
 }
 
-func (c *copier) saveDescriptor(key string, d Descriptor) Descriptor {
+func (c *copier) save(pair TypePair, d interface{}) interface{} {
 	if d != nil {
-		c.cache[key] = d
+		c.typeCache.Set(pair, d)
 	}
 	return d
-}
-
-func (c *copier) cacheKey(dstRType, srcRType uintptr) string {
-	return fmt.Sprintf("%d-%d", dstRType, srcRType)
 }

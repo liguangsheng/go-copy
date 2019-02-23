@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type FieldParser func(field reflect.StructField) string
+type FieldParseFunc func(field reflect.StructField) string
 
 func ParseFiledByName(field reflect.StructField) string {
 	return field.Name

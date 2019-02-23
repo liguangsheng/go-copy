@@ -1,37 +1,38 @@
-package copy
+package _test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/liguangsheng/go-copy"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStringToString(t *testing.T) {
 	var src = "sudo i love you"
 	var dst = "i love you"
-	assert.NoError(t, Copy(&dst, src))
+	assert.NoError(t, copy.Copy(&dst, src))
 	assert.Equal(t, "sudo i love you", dst)
 }
 
 func TestInt64ToInt64(t *testing.T) {
 	var src int64 = 64
 	var dst int64 = 0
-	assert.NoError(t, Copy(&dst, src))
+	assert.NoError(t, copy.Copy(&dst, src))
 	assert.Equal(t, int64(64), dst)
 }
 
 func TestTimeToInt64(t *testing.T) {
 	var src = time.Now()
 	var dst int64 = 0
-	assert.NoError(t, Copy(&dst, src))
+	assert.NoError(t, copy.Copy(&dst, src))
 	assert.Equal(t, src.Unix(), dst)
 }
 
 func TestInt64ToTime(t *testing.T) {
 	var src = time.Now().Unix()
 	var dst time.Time
-	assert.NoError(t, Copy(&dst, src))
+	assert.NoError(t, copy.Copy(&dst, src))
 	assert.Equal(t, src, dst.Unix())
 }
 
@@ -57,7 +58,7 @@ func TestStructToStruct(t *testing.T) {
 		Field4 float64
 		Field5 int64
 	}
-	cpr := NewCopier()
+	cpr := copy.NewCopier()
 	assert.NoError(t, cpr.Copy(&dst, src))
 	assert.Equal(t, int(1), dst.Field1)
 	assert.Equal(t, "you are a good guy", dst.Field2)

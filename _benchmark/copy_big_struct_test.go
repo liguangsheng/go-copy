@@ -1,133 +1,12 @@
-package copy
+package _benchmark
 
 import (
+	jzcopier "github.com/jinzhu/copier"
+	"github.com/liguangsheng/go-copy"
+	"github.com/ulule/deepcopier"
 	"testing"
 	"time"
-
-	"github.com/ulule/deepcopier"
-
-	jinzhu_copier "github.com/jinzhu/copier"
 )
-
-type TestStructSmallA struct {
-	Field1 int
-	Field7 float64
-	Field8 string
-}
-type TestStructSmallB struct {
-	Field1 int
-	Field7 float64
-	Field8 string
-}
-
-func BenchmarkJinzhuCopySmall(b *testing.B) {
-	var src = TestStructSmallA{}
-	var dst TestStructSmallB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		jinzhu_copier.Copy(&dst, src)
-	}
-}
-
-func BenchmarkDeepCopySmall(b *testing.B) {
-	var src = TestStructSmallA{}
-	var dst TestStructSmallB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		deepcopier.Copy(src).To(&dst)
-	}
-}
-
-func BenchmarkJSONCopySmall(b *testing.B) {
-	var src = TestStructSmallA{}
-	var dst TestStructSmallB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		JSONCopy(&dst, src)
-	}
-}
-
-func BenchmarkCopySmall(b *testing.B) {
-	var src = TestStructSmallA{}
-	var dst TestStructSmallB
-	cpr := NewCopier()
-	cpr.Copy(&dst, src)
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		cpr.Copy(&dst, src)
-	}
-}
-
-type TestStructMediumA struct {
-	Field1  int
-	Field2  int8
-	Field3  int16
-	Field4  int32
-	Field5  int64
-	Field6  float32
-	Field7  float64
-	Field8  string
-	Field9  bool
-	Field10 time.Time
-}
-type TestStructMediumB struct {
-	Field1  int
-	Field2  int8
-	Field3  int16
-	Field4  int32
-	Field5  int64
-	Field6  float32
-	Field7  float64
-	Field8  string
-	Field9  bool
-	Field10 time.Time
-}
-
-func BenchmarkJinzhuCopyMedium(b *testing.B) {
-	var src = TestStructMediumA{}
-	var dst TestStructMediumB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		jinzhu_copier.Copy(&dst, src)
-	}
-}
-
-func BenchmarkDeepCopyMedium(b *testing.B) {
-	var src = TestStructMediumA{}
-	var dst TestStructMediumB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		deepcopier.Copy(src).To(&dst)
-	}
-}
-
-func BenchmarkJSONCopyMedium(b *testing.B) {
-	var src = TestStructMediumA{}
-	var dst TestStructMediumB
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		JSONCopy(&dst, src)
-	}
-}
-
-func BenchmarkCopyMedium(b *testing.B) {
-	var src = TestStructMediumA{}
-	var dst TestStructMediumB
-	cpr := NewCopier()
-	cpr.Copy(&dst, src)
-	b.ResetTimer()
-	b.ReportAllocs()
-	for i := 0; i < b.N; i++ {
-		cpr.Copy(&dst, src)
-	}
-}
 
 type TestStructBigA struct {
 	Field0  int
@@ -338,9 +217,8 @@ func BenchmarkJinzhuCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
 	b.ResetTimer()
-	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		jinzhu_copier.Copy(&dst, src)
+		jzcopier.Copy(&dst, src)
 	}
 }
 
@@ -348,7 +226,6 @@ func BenchmarkDeepCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
 	b.ResetTimer()
-	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		deepcopier.Copy(src).To(&dst)
 	}
@@ -358,19 +235,17 @@ func BenchmarkJSONCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
 	b.ResetTimer()
-	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		JSONCopy(&dst, src)
+		copy.JSONCopy(&dst, src)
 	}
 }
 
 func BenchmarkCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
-	cpr := NewCopier()
+	cpr := copy.NewCopier()
 	cpr.Copy(&dst, src)
 	b.ResetTimer()
-	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		cpr.Copy(&dst, src)
 	}
