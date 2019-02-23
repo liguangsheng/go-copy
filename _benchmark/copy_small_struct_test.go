@@ -1,10 +1,11 @@
 package _benchmark
 
 import (
+	"testing"
+
 	jzcopier "github.com/jinzhu/copier"
 	"github.com/liguangsheng/go-copy"
 	"github.com/ulule/deepcopier"
-	"testing"
 )
 
 type TestStructSmallA struct {

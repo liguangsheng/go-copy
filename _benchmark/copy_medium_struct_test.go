@@ -1,11 +1,12 @@
 package _benchmark
 
 import (
+	"testing"
+	"time"
+
 	jzcopier "github.com/jinzhu/copier"
 	"github.com/liguangsheng/go-copy"
 	"github.com/ulule/deepcopier"
-	"testing"
-	"time"
 )
 
 type TestStructMediumA struct {

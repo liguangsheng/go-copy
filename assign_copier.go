@@ -1,8 +1,9 @@
 package copy
 
 import (
-	"github.com/modern-go/reflect2"
 	"unsafe"
+
+	"github.com/modern-go/reflect2"
 )
 
 type assignCopier struct{}
