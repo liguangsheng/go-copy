@@ -37,8 +37,6 @@ type TestStructMediumB struct {
 func BenchmarkJinzhuCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dst TestStructMediumB
-	b.ResetTimer()
-
 	for i := 0; i < b.N; i++ {
 		jzcopier.Copy(&dst, src)
 	}
@@ -47,8 +45,6 @@ func BenchmarkJinzhuCopyMedium(b *testing.B) {
 func BenchmarkDeepCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dst TestStructMediumB
-	b.ResetTimer()
-
 	for i := 0; i < b.N; i++ {
 		deepcopier.Copy(src).To(&dst)
 	}
@@ -57,8 +53,6 @@ func BenchmarkDeepCopyMedium(b *testing.B) {
 func BenchmarkJSONCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dst TestStructMediumB
-	b.ResetTimer()
-
 	for i := 0; i < b.N; i++ {
 		copy.JSONCopy(&dst, src)
 	}
@@ -69,8 +63,6 @@ func BenchmarkCopyMedium(b *testing.B) {
 	var dst TestStructMediumB
 	cpr := copy.NewCopier()
 	cpr.Copy(&dst, src)
-	b.ResetTimer()
-
 	for i := 0; i < b.N; i++ {
 		cpr.Copy(&dst, src)
 	}

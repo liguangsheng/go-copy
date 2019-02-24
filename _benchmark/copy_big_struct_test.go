@@ -217,7 +217,6 @@ type TestStructBigB struct {
 func BenchmarkJinzhuCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		jzcopier.Copy(&dst, src)
 	}
@@ -226,7 +225,6 @@ func BenchmarkJinzhuCopyBig(b *testing.B) {
 func BenchmarkDeepCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		deepcopier.Copy(src).To(&dst)
 	}
@@ -235,7 +233,6 @@ func BenchmarkDeepCopyBig(b *testing.B) {
 func BenchmarkJSONCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dst TestStructBigB
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		copy.JSONCopy(&dst, src)
 	}
@@ -246,7 +243,6 @@ func BenchmarkCopyBig(b *testing.B) {
 	var dst TestStructBigB
 	cpr := copy.NewCopier()
 	cpr.Copy(&dst, src)
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cpr.Copy(&dst, src)
 	}
