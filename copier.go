@@ -44,6 +44,15 @@ func (c *copier) Register(copiers ...TypedCopier) {
 	}
 }
 
+// Unregister remove typed copier from cache
+func (c *copier) Unregister(copiers ...TypedCopier) {
+	for _, co := range copiers {
+		for _, pair := range co.Pairs() {
+			c.typeCache.Remove(pair)
+		}
+	}
+}
+
 func (c *copier) Copy(dst, src interface{}) error {
 	var (
 		dstType  = indirectType(reflect.TypeOf(dst))
