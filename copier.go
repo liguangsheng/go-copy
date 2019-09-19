@@ -5,21 +5,21 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/liguangsheng/go-cache"
 	"github.com/modern-go/reflect2"
+	"github.com/golang/groupcache/lru"
 )
 
 type Copier = *copier
 
 type copier struct {
 	cacheSize   int
-	typeCache   cache.Cache
+	typeCache   *lru.Cache
 	fieldParser FieldParseFunc
 }
 
 func NewCopier(opts ...Option) *copier {
 	c := &copier{
-		typeCache:   cache.New(),
+		typeCache:   lru.New(1000),
 		fieldParser: ParseFiledByName,
 	}
 
@@ -39,7 +39,7 @@ func NewCopier(opts ...Option) *copier {
 func (c *copier) Register(copiers ...TypedCopier) {
 	for _, co := range copiers {
 		for _, pair := range co.Pairs() {
-			c.typeCache.Set(pair, co)
+			c.typeCache.Add(pair, co)
 		}
 	}
 }
@@ -147,7 +147,7 @@ func (c *copier) parseStructs(dstType, srcType reflect2.Type) *structDescriptor 
 
 func (c *copier) save(pair TypePair, d interface{}) interface{} {
 	if d != nil {
-		c.typeCache.Set(pair, d)
+		c.typeCache.Add(pair, d)
 	}
 	return d
 }
