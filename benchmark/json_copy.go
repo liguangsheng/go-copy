@@ -1,10 +1,10 @@
-package copy
+package benchmark
 
 import "github.com/json-iterator/go"
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-func JSONCopy(dst, src interface{}) {
+func JSONCopy(dest, src interface{}) error {
 	bytes, _ := json.Marshal(src)
-	json.Unmarshal(bytes, dst)
+	return json.Unmarshal(bytes, dest)
 }

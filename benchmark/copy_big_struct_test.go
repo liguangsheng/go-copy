@@ -1,4 +1,4 @@
-package _benchmark
+package benchmark
 
 import (
 	"testing"
@@ -216,34 +216,34 @@ type TestStructBigB struct {
 
 func BenchmarkJinzhuCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
-	var dst TestStructBigB
+	var dest TestStructBigB
 	for i := 0; i < b.N; i++ {
-		jzcopier.Copy(&dst, src)
+		jzcopier.Copy(&dest, src)
 	}
 }
 
 func BenchmarkDeepCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
-	var dst TestStructBigB
+	var dest TestStructBigB
 	for i := 0; i < b.N; i++ {
-		deepcopier.Copy(src).To(&dst)
+		deepcopier.Copy(src).To(&dest)
 	}
 }
 
 func BenchmarkJSONCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
-	var dst TestStructBigB
+	var dest TestStructBigB
 	for i := 0; i < b.N; i++ {
-		copy.JSONCopy(&dst, src)
+		JSONCopy(&dest, src)
 	}
 }
 
-func BenchmarkCopyBig(b *testing.B) {
+func BenchmarkMyCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
-	var dst TestStructBigB
-	cpr := copy.NewCopier()
-	cpr.Copy(&dst, src)
+	var dest TestStructBigB
+	cpr := copy.New()
+	cpr.Copy(&dest, src)
 	for i := 0; i < b.N; i++ {
-		cpr.Copy(&dst, src)
+		cpr.Copy(&dest, src)
 	}
 }
