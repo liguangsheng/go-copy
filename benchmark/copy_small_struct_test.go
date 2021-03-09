@@ -39,7 +39,7 @@ func BenchmarkJSONCopySmall(b *testing.B) {
 	var src = TestStructSmallA{}
 	var dest TestStructSmallB
 	for i := 0; i < b.N; i++ {
-		JSONCopy(&dest, src)
+		jsonCopy(&dest, src)
 	}
 }
 

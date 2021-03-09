@@ -54,7 +54,7 @@ func BenchmarkJSONCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dest TestStructMediumB
 	for i := 0; i < b.N; i++ {
-		JSONCopy(&dest, src)
+		jsonCopy(&dest, src)
 	}
 }
 

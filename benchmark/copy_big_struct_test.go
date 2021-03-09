@@ -234,7 +234,7 @@ func BenchmarkJSONCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dest TestStructBigB
 	for i := 0; i < b.N; i++ {
-		JSONCopy(&dest, src)
+		jsonCopy(&dest, src)
 	}
 }
 
