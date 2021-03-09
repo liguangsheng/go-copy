@@ -272,8 +272,7 @@ func memset(dest unsafe.Pointer, c int8, n uintptr) unsafe.Pointer {
 	if cnt > 0 {
 		left += 8
 	}
-	var i uintptr = 0
-	for i = 0; i < left; i++ {
+	for i := uintptr(0); i < left; i++ {
 		var destPtr = (*int8)(unsafe.Pointer(uintptr(dest) + uintptr(i)))
 		*destPtr = c
 	}
@@ -282,7 +281,7 @@ func memset(dest unsafe.Pointer, c int8, n uintptr) unsafe.Pointer {
 	}
 	var firstPtr = (*int64)(dest)
 
-	for i = 0; i < cnt-1; i++ {
+	for i := uintptr(0); i < cnt-1; i++ {
 		var destPtr = (*int64)(unsafe.Pointer(uintptr(dest) + uintptr(left+8*i)))
 		*destPtr = *firstPtr
 	}
