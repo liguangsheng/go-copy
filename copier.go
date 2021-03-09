@@ -128,16 +128,11 @@ func (c *Copier) Copy(dest, src interface{}) error {
 func (c *Copier) copy(destPtr, srcPtr unsafe.Pointer, ca copyable) error {
 	// memory copy
 	if ca.assignable {
-		srcSize := ca.destSize
-		destSize := ca.srcSize
-		min := destSize
-		max := destSize
-		if destSize > srcSize {
-			max = destSize
-			min = srcSize
-		} else {
-			max = srcSize
-			min = destSize
+		max := ca.destSize
+		min := ca.srcSize
+		if max > min {
+			max = ca.srcSize
+			min = ca.destSize
 		}
 		memcpy(
 			unsafe.Pointer(uintptr(destPtr)+ca.destOffset),
