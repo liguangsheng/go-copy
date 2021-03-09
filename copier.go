@@ -209,7 +209,10 @@ func parseStructs(destType, srcType reflect2.Type, nameFunc NameFunc) []copyable
 		}
 	}
 
-	// merge
+	return merge(fields)
+}
+
+func merge(fields []*copyable) []copyable {
 	for i := 0; i < len(fields); i++ {
 		f1 := fields[i]
 		if !f1.assignable || f1.ban {
