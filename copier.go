@@ -11,11 +11,7 @@ import (
 	"github.com/modern-go/reflect2"
 )
 
-var _globalCopier *Copier
-
-func init() {
-	_globalCopier = New()
-}
+var _globalCopier = New()
 
 // Copy values
 func Copy(dest, src interface{}) error {
