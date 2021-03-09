@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/liguangsheng/go-copy)](https://goreportcard.com/report/github.com/liguangsheng/go-copy)
+
 # go-copy
 
 fast copy struct dest struct for golang.
