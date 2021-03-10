@@ -2,7 +2,6 @@ package copy
 
 import (
 	"encoding/binary"
-	"errors"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -117,31 +116,40 @@ func (c *Copier) Copy(dest, src interface{}) error {
 	)
 
 	return c.copy(destPtr, srcPtr, copyable{
-		assignable: assignableTo(srcType2, destType2),
+		assignable: assignableTo(destType2, srcType2),
 		srcType:    srcType2,
 		destType:   destType2,
-		destSize:   srcType.Size(),
-		srcSize:    destType.Size(),
+		destSize:   destType.Size(),
+		srcSize:    srcType.Size(),
 	})
 }
 
-func (c *Copier) copy(destPtr, srcPtr unsafe.Pointer, ca copyable) error {
+const _mask uint8 = 0b10000000
+
+func (c *Copier) copy(dest, src unsafe.Pointer, ca copyable) error {
 	// memory copy
 	if ca.assignable {
 		max := ca.destSize
 		min := ca.srcSize
-		if max > min {
+		if max < min {
 			max = ca.srcSize
 			min = ca.destSize
 		}
 		memcpy(
-			unsafe.Pointer(uintptr(destPtr)+ca.destOffset),
-			unsafe.Pointer(uintptr(srcPtr)+ca.srcOffset),
+			unsafe.Pointer(uintptr(dest)+ca.destOffset),
+			unsafe.Pointer(uintptr(src)+ca.srcOffset),
 			min,
 		)
 
-		if max > min {
-			memset(unsafe.Pointer(uintptr(destPtr)+ca.destOffset+min), 0, max-min)
+		if ca.destType != nil && ca.srcType != nil {
+			var c int8 = 0
+			if isSignedInt(ca.srcType.Kind()) && isSignedInt(ca.destType.Kind()) && _mask&*(*uint8)(src) > 0 {
+				c = -0b1
+			}
+
+			if max > min {
+				memset(unsafe.Pointer(uintptr(dest)+ca.destOffset+min), c, max-min)
+			}
 		}
 
 		return nil
@@ -150,17 +158,17 @@ func (c *Copier) copy(destPtr, srcPtr unsafe.Pointer, ca copyable) error {
 	// use cached copy handler
 	hash := hashRType(ca.destType.RType(), ca.srcType.RType())
 	if handler, ok := c.cache.Get(hash); ok {
-		return handler.(Handler).Copy(ca.destType, ca.srcType, destPtr, srcPtr)
+		return handler.(Handler).Copy(ca.destType, ca.srcType, dest, src)
 	}
 
 	fields := parseStructs(ca.destType, ca.srcType, c.nameFunc)
 	if fields != nil {
 		sh := &structsHandler{copier: c, fields: fields}
 		c.cache.Add(hash, sh)
-		return sh.Copy(ca.destType, ca.srcType, destPtr, srcPtr)
+		return sh.Copy(ca.destType, ca.srcType, dest, src)
 	}
 
-	return errors.New("unsupported copy")
+	return nil
 }
 
 func parseStructs(destType, srcType reflect2.Type, nameFunc NameFunc) []copyable {
@@ -184,7 +192,7 @@ func parseStructs(destType, srcType reflect2.Type, nameFunc NameFunc) []copyable
 		if len(srcFields) == 1 {
 			srcField := srcFields[0]
 			fields = append(fields, &copyable{
-				assignable: assignableTo(reflect2.Type2(srcField.raw.Type), reflect2.Type2(destField.raw.Type)),
+				assignable: assignableTo(reflect2.Type2(destField.raw.Type), reflect2.Type2(srcField.raw.Type)),
 				srcType:    reflect2.Type2(srcField.raw.Type),
 				srcOffset:  srcField.offset,
 				destType:   reflect2.Type2(destField.raw.Type),
@@ -198,7 +206,7 @@ func parseStructs(destType, srcType reflect2.Type, nameFunc NameFunc) []copyable
 		srcField, ok := fullNameMap[destField.fullPath]
 		if ok {
 			fields = append(fields, &copyable{
-				assignable: assignableTo(reflect2.Type2(srcField.raw.Type), reflect2.Type2(destField.raw.Type)),
+				assignable: assignableTo(reflect2.Type2(destField.raw.Type), reflect2.Type2(srcField.raw.Type)),
 				srcType:    reflect2.Type2(srcField.raw.Type),
 				srcOffset:  srcField.offset,
 				destType:   reflect2.Type2(destField.raw.Type),
@@ -298,7 +306,7 @@ func assignableTo(dest, src reflect2.Type) bool {
 	}
 
 	if isIntKind(src.Kind()) && isIntKind(dest.Kind()) {
-		return true
+		return dest.Type1().Bits() >= src.Type1().Bits()
 	}
 
 	if src.Kind() == reflect.Interface && src.Kind() == reflect.Interface {
@@ -339,6 +347,22 @@ func isIntKind(k reflect.Kind) bool {
 	default:
 		return false
 	}
+}
+
+func isSignedInt(k reflect.Kind) bool {
+	switch k {
+	case reflect.Int:
+		fallthrough
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		return true
+	}
+	return false
 }
 
 type copyable struct {
