@@ -55,57 +55,48 @@ func TestEnumToString(t *testing.T) {
 }
 
 func TestStructToStruct(t *testing.T) {
-	type Interface interface{}
-	type enum int32
-	type s struct {
-		FieldInt int
-	}
+	type (
+		FieldStruct struct {
+			FieldInt int
+		}
+		SrcStruct struct {
+			FieldInterface interface{}
+			FieldInt       int
+			FieldInt64     int64
+			FieldFloat64   float64
+			FieldString    string
+			FieldStruct    FieldStruct
+		}
+		DestStruct struct {
+			FieldInterface interface{}
+			FieldInt       int
+			FieldInt64     int64
+			FieldFloat64   float64
+			FieldString    string
+			FieldStruct    FieldStruct
+		}
+	)
 
-	type ss struct {
-		Interface
-		FieldInterface    interface{}
-		FieldInt          int
-		FieldInt64        int64
-		FieldFloat64      float64
-		FieldString       string
-		FieldStruct       s
-		FieldEnumToInt32  enum
-		FieldInt32ToEnum  int32
-		FieldInt32ToInt64 int32
-	}
-
-	var src = ss{
-		FieldInterface:   "interface field",
-		FieldInt:         1,
-		FieldString:      "you are a good guy",
-		FieldInt64:       3,
-		FieldFloat64:     3.141592654,
-		FieldStruct:      s{FieldInt: 42},
-		FieldEnumToInt32: enum(43),
-		FieldInt32ToEnum: 563,
-	}
-	var dest struct {
-		Interface
-		FieldInterface   interface{}
-		FieldInt         int
-		FieldInt64       int64
-		FieldFloat64     float64
-		FieldString      string
-		FieldStruct      s
-		FieldEnumToInt32 int32
-		FieldInt32ToEnum enum
-	}
-	cpr := New()
-	a := assert.New(t)
-	assert.NoError(t, cpr.Copy(&dest, src))
+	var (
+		src = SrcStruct{
+			FieldInterface: "interface field",
+			FieldInt:       1,
+			FieldString:    "you are a good guy",
+			FieldInt64:     3,
+			FieldFloat64:   3.141592654,
+			FieldStruct:    FieldStruct{FieldInt: 42},
+		}
+		dest = DestStruct{}
+		cpr  = New()
+		a    = assert.New(t)
+	)
+	a.NoError(cpr.Copy(&dest, src))
 	a.Equal("interface field", dest.FieldInterface)
 	a.Equal(int(1), dest.FieldInt)
 	a.Equal("you are a good guy", dest.FieldString)
 	a.Equal(int64(3), dest.FieldInt64)
 	a.Equal(float64(3.141592654), dest.FieldFloat64)
 	a.Equal(42, dest.FieldStruct.FieldInt)
-	a.Equal(int32(43), dest.FieldEnumToInt32)
-	a.Equal(enum(563), dest.FieldInt32ToEnum)
 }
 
 func TestEmbeddingStruct(t *testing.T) {
