@@ -22,6 +22,38 @@ func TestInt64ToInt64(t *testing.T) {
 	assert.Equal(t, int64(64), dest)
 }
 
+func TestInt32ToEnum(t *testing.T) {
+	type enum int32
+	var src int32 = 2242
+	var dest enum
+	assert.NoError(t, Copy(&dest, src))
+	assert.Equal(t, enum(2242), dest)
+}
+
+func TestEnumToInt32(t *testing.T) {
+	type enum int32
+	var src enum = 2242
+	var dest int32
+	assert.NoError(t, Copy(&dest, src))
+	assert.Equal(t, int32(2242), dest)
+}
+
+func TestStringToEnum(t *testing.T) {
+	type enum string
+	var src string = "enum string"
+	var dest enum
+	assert.NoError(t, Copy(&dest, src))
+	assert.Equal(t, enum("enum string"), dest)
+}
+
+func TestEnumToString(t *testing.T) {
+	type enum string
+	var src enum = "enum string"
+	var dest string
+	assert.NoError(t, Copy(&dest, src))
+	assert.Equal(t, string("enum string"), dest)
+}
+
 func TestStructToStruct(t *testing.T) {
 	type Interface interface{}
 	type enum int32
