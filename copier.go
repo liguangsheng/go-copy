@@ -297,7 +297,7 @@ func assignableTo(dest, src reflect2.Type) bool {
 		return true
 	}
 
-	if isIntKine(src.Kind()) && isIntKine(dest.Kind()) {
+	if isIntKind(src.Kind()) && isIntKind(dest.Kind()) {
 		return true
 	}
 
@@ -312,7 +312,7 @@ func assignableTo(dest, src reflect2.Type) bool {
 	return false
 }
 
-func isIntKine(k reflect.Kind) bool {
+func isIntKind(k reflect.Kind) bool {
 	switch k {
 	case reflect.Int:
 		fallthrough
