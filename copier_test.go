@@ -35,14 +35,6 @@ func TestInt8ToInt(t *testing.T) {
 	assert.Equal(t, int(-64), dest)
 }
 
-func TestPlay(t *testing.T) {
-	var src int8 = -64
-	var dest uint8 = 45
-	fmt.Println(uint8(src))
-	assert.NoError(t, Copy(&dest, src))
-	assert.Equal(t, uint8(192), dest)
-}
-
 func TestInt32ToEnum(t *testing.T) {
 	type enum int32
 	var src int32 = 2242
@@ -100,7 +92,7 @@ func TestStructToStruct(t *testing.T) {
 
 	var (
 		src = SrcStruct{
-			FieldInterface: "interface field",
+			FieldInterface: "interface _field",
 			FieldInt:       1,
 			FieldString:    "you are a good guy",
 			FieldInt64:     3,
@@ -112,7 +104,7 @@ func TestStructToStruct(t *testing.T) {
 		a    = assert.New(t)
 	)
 	a.NoError(cpr.Copy(&dest, src))
-	a.Equal("interface field", dest.FieldInterface)
+	a.Equal("interface _field", dest.FieldInterface)
 	a.Equal(int(1), dest.FieldInt)
 	a.Equal("you are a good guy", dest.FieldString)
 	a.Equal(int64(3), dest.FieldInt64)
@@ -135,15 +127,15 @@ func TestEmbeddingStruct(t *testing.T) {
 		Embedding
 		Embedding2
 	}{
-		DuplicateField: "outer duplicate copyable",
+		DuplicateField: "outer duplicate _pair",
 		Embedding: Embedding{
-			FieldString:          "embedding string copyable",
-			DuplicateField:       "inner duplicate copyable",
-			UniqueEmbeddingField: "unique embedding string copyable",
+			FieldString:          "embedding string _pair",
+			DuplicateField:       "inner duplicate _pair",
+			UniqueEmbeddingField: "unique embedding string _pair",
 		},
 		Embedding2: Embedding2{
-			FieldString:    "embedding string copyable - 2",
-			DuplicateField: "inner duplicate copyable - 2",
+			FieldString:    "embedding string _pair - 2",
+			DuplicateField: "inner duplicate _pair - 2",
 		},
 	}
 
@@ -157,12 +149,12 @@ func TestEmbeddingStruct(t *testing.T) {
 
 	a := assert.New(t)
 	a.NoError(Copy(&dest, src))
-	a.Equal("embedding string copyable", dest.Embedding.FieldString)
-	a.Equal("inner duplicate copyable", dest.Embedding.DuplicateField)
-	a.Equal("outer duplicate copyable", dest.DuplicateField)
-	a.Equal("embedding string copyable - 2", dest.Embedding2.FieldString)
-	a.Equal("inner duplicate copyable - 2", dest.Embedding2.DuplicateField)
-	a.Equal("unique embedding string copyable", dest.UniqueEmbeddingField)
+	a.Equal("embedding string _pair", dest.Embedding.FieldString)
+	a.Equal("inner duplicate _pair", dest.Embedding.DuplicateField)
+	a.Equal("outer duplicate _pair", dest.DuplicateField)
+	a.Equal("embedding string _pair - 2", dest.Embedding2.FieldString)
+	a.Equal("inner duplicate _pair - 2", dest.Embedding2.DuplicateField)
+	a.Equal("unique embedding string _pair", dest.UniqueEmbeddingField)
 	a.Equal("", dest.FieldEmpty)
 }
 
