@@ -145,6 +145,45 @@ func TestEmbeddingStruct(t *testing.T) {
 	a.Equal("", dest.FieldEmpty)
 }
 
+type Interface interface {
+	Foo()
+}
+
+type StringInterface string
+
+func (StringInterface) Foo() { fmt.Println("foo") }
+
+type Interface2 interface {
+	Bar()
+}
+
+type StringInterface2 string
+
+func (StringInterface2) Bar() { fmt.Println("bar") }
+
+func TestInterfaceNotImplemented(t *testing.T) {
+	type (
+		SrcStruct struct {
+			InterfaceToInterface2 Interface
+		}
+		DestStruct struct {
+			InterfaceToInterface2 Interface2
+		}
+	)
+
+	var (
+		src = SrcStruct{
+			InterfaceToInterface2: StringInterface("string interface"),
+		}
+		dest = DestStruct{}
+		cpr  = New()
+		a    = assert.New(t)
+	)
+
+	cpr.Copy(&dest, src)
+	a.Nil(dest.InterfaceToInterface2)
+}
+
 func TestCopyInts(t *testing.T) {
 	//var val = 18
 	var (

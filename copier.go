@@ -301,6 +301,10 @@ func assignableTo(dest, src reflect2.Type) bool {
 		return true
 	}
 
+	if src.Kind() == reflect.Interface && src.Kind() == reflect.Interface {
+		return dest.Implements(src)
+	}
+
 	if dest.Kind() == src.Kind() && src.Kind() != reflect.Struct {
 		return true
 	}
