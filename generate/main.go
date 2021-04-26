@@ -47,10 +47,10 @@ import (
 )
 
 func copyNumber(dest, src unsafe.Pointer, destKind, srcKind reflect.Kind) bool {
-	switch destKind {
-{{range $destkind := $destKinds}} {{$DestKind := $destkind.String|title}}		case reflect.{{$DestKind}}:
-			switch srcKind {
-{{range $srckind := $srcKinds}}{{$SrcKind := $srckind.String|title}}			case reflect.{{$SrcKind}}:
+	switch srcKind {
+{{range $srckind := $srcKinds}} {{$SrcKind := $srckind.String|title}}		case reflect.{{$SrcKind}}:
+			switch destKind {
+{{range $destkind := $destKinds}}{{$DestKind := $destkind.String|title}}			case reflect.{{$DestKind}}:
 				*((*{{$destkind}})(dest)) = {{$destkind}}(*((*{{$srckind}})(src)))
 				return true
 {{end}}

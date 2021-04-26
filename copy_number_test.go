@@ -5,8 +5,7 @@ import (
 	"testing"
 )
 
-func TestCopyNumber(t *testing.T){
-
+func TestCopyNumber(t *testing.T) {
 
 	t.Run("TestInt8ToInt8", func(t *testing.T) {
 		var src int8 = 18
@@ -99,8 +98,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestInt16ToInt8", func(t *testing.T) {
 		var src int16 = 18
 		var dest int8 = 10
@@ -191,8 +188,6 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
-
 
 	t.Run("TestInt32ToInt8", func(t *testing.T) {
 		var src int32 = 18
@@ -285,8 +280,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestInt64ToInt8", func(t *testing.T) {
 		var src int64 = 18
 		var dest int8 = 10
@@ -377,8 +370,6 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
-
 
 	t.Run("TestIntToInt8", func(t *testing.T) {
 		var src int = 18
@@ -471,8 +462,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestUint8ToInt8", func(t *testing.T) {
 		var src uint8 = 18
 		var dest int8 = 10
@@ -563,8 +552,6 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
-
 
 	t.Run("TestUint16ToInt8", func(t *testing.T) {
 		var src uint16 = 18
@@ -657,8 +644,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestUint32ToInt8", func(t *testing.T) {
 		var src uint32 = 18
 		var dest int8 = 10
@@ -749,8 +734,6 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
-
 
 	t.Run("TestUint64ToInt8", func(t *testing.T) {
 		var src uint64 = 18
@@ -843,8 +826,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestUintToInt8", func(t *testing.T) {
 		var src uint = 18
 		var dest int8 = 10
@@ -935,8 +916,6 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
-
 
 	t.Run("TestUintptrToInt8", func(t *testing.T) {
 		var src uintptr = 18
@@ -1029,8 +1008,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestFloat32ToInt8", func(t *testing.T) {
 		var src float32 = 18
 		var dest int8 = 10
@@ -1122,8 +1099,6 @@ func TestCopyNumber(t *testing.T){
 		assert.Equal(t, float64(src), dest)
 	})
 
-
-
 	t.Run("TestFloat64ToInt8", func(t *testing.T) {
 		var src float64 = 18
 		var dest int8 = 10
@@ -1214,6 +1189,5 @@ func TestCopyNumber(t *testing.T){
 		assert.NoError(t, Copy(&dest, src))
 		assert.Equal(t, float64(src), dest)
 	})
-
 
 }
