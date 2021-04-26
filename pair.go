@@ -1,9 +1,9 @@
 package copy
 
 import (
-	"github.com/modern-go/reflect2"
-	"reflect"
 	"unsafe"
+
+	"github.com/modern-go/reflect2"
 )
 
 const _mask uint8 = 0b10000000
@@ -20,6 +20,10 @@ type _pair struct {
 }
 
 func (p *_pair) copy(dest, src unsafe.Pointer) {
+	if p.copyNumber(unsafe.Pointer(uintptr(dest)+p.destOffset), unsafe.Pointer(uintptr(src)+p.srcOffset)) {
+		return
+	}
+
 	max := p.destSize
 	min := p.srcSize
 	if max < min {
@@ -34,7 +38,7 @@ func (p *_pair) copy(dest, src unsafe.Pointer) {
 
 	if p.destType != nil && p.srcType != nil {
 		var c int8 = 0
-		if isSignedInt(p.srcType.Kind()) && isSignedInt(p.destType.Kind()) && _mask&*(*uint8)(src) > 0 {
+		if isSignedIntsKind(p.srcType.Kind()) && isSignedIntsKind(p.destType.Kind()) && _mask&*(*uint8)(src) > 0 {
 			c = -0b1
 		}
 
@@ -42,7 +46,6 @@ func (p *_pair) copy(dest, src unsafe.Pointer) {
 			memset(unsafe.Pointer(uintptr(dest)+p.destOffset+min), c, max-min)
 		}
 	}
-
 }
 
 func (p *_pair) merge(p2 *_pair) bool {
@@ -62,75 +65,10 @@ func (p *_pair) merge(p2 *_pair) bool {
 	return true
 }
 
-func parseStructs(destType, srcType reflect2.Type, nameFunc NameFunc) []*_pair {
-	if destType.Kind() != reflect.Struct || srcType.Kind() != reflect.Struct {
-		return nil
+func (p *_pair) copyNumber(dest, src unsafe.Pointer) bool {
+	if p.destType == nil || p.srcType == nil {
+		return false
 	}
 
-	nameMap := make(map[string][]_field)
-	fullNameMap := make(map[string]_field)
-	for _, field := range deepFields(srcType.Type1(), nil, nameFunc) {
-		nameMap[field.name] = append(nameMap[field.name], field)
-		fullNameMap[field.fullPath] = field
-	}
-
-	var fields []*_pair
-	for _, destField := range deepFields(destType.Type1(), nil, nameFunc) {
-		srcFields, ok := nameMap[destField.name]
-		if !ok {
-			continue
-		}
-
-		var srcField *_field
-		if len(srcFields) == 1 {
-			srcField = &srcFields[0]
-		} else {
-			matched, ok := fullNameMap[destField.fullPath]
-			if ok {
-				srcField = &matched
-			}
-		}
-
-		if srcField != nil {
-			fields = append(fields, &_pair{
-				assignable: assignable(reflect2.Type2(destField.raw.Type), reflect2.Type2(srcField.raw.Type)),
-				srcType:    reflect2.Type2(srcField.raw.Type),
-				srcOffset:  srcField.offset,
-				destType:   reflect2.Type2(destField.raw.Type),
-				destOffset: destField.offset,
-				destSize:   destField.raw.Type.Size(),
-				srcSize:    srcField.raw.Type.Size(),
-			})
-		}
-	}
-
-	return merge(fields)
-}
-
-func merge(pairs []*_pair) []*_pair {
-	for i := 0; i < len(pairs); i++ {
-		p := pairs[i]
-		if !p.assignable || p.ban {
-			continue
-		}
-
-		for j, p2 := range pairs {
-			if i == j {
-				continue
-			}
-
-			if p.merge(p2) {
-				i--
-				break
-			}
-		}
-	}
-
-	var validFields []*_pair
-	for _, f := range pairs {
-		if !f.ban {
-			validFields = append(validFields, f)
-		}
-	}
-	return validFields
+	return copyNumber(dest, src, p.destType.Kind(), p.srcType.Kind())
 }

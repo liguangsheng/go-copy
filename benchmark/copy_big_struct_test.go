@@ -238,7 +238,7 @@ func BenchmarkJSONCopyBig(b *testing.B) {
 	}
 }
 
-func BenchmarkMyCopyBig(b *testing.B) {
+func BenchmarkThisRepoCopyBig(b *testing.B) {
 	var src = TestStructBigA{}
 	var dest TestStructBigB
 	cpr := copy.New()

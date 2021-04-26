@@ -58,7 +58,7 @@ func BenchmarkJSONCopyMedium(b *testing.B) {
 	}
 }
 
-func BenchmarkMyCopyMedium(b *testing.B) {
+func BenchmarkThisRepoCopyMedium(b *testing.B) {
 	var src = TestStructMediumA{}
 	var dest TestStructMediumB
 	cpr := copy.New()

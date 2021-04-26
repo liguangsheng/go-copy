@@ -17,8 +17,8 @@ func assignable(dest, src reflect2.Type) bool {
 		return true
 	}
 
-	if isIntKind(src.Kind()) && isIntKind(dest.Kind()) {
-		return dest.Type1().Bits() >= src.Type1().Bits()
+	if isNumberKind(src.Kind()) && isNumberKind(dest.Kind()) {
+		return true
 	}
 
 	if src.Kind() == reflect.Interface && src.Kind() == reflect.Interface {
@@ -32,36 +32,28 @@ func assignable(dest, src reflect2.Type) bool {
 	return false
 }
 
-func isIntKind(k reflect.Kind) bool {
+func isNumberKind(k reflect.Kind) bool {
 	switch k {
-	case reflect.Int:
-		fallthrough
-	case reflect.Int8:
-		fallthrough
-	case reflect.Int16:
-		fallthrough
-	case reflect.Int32:
-		fallthrough
-	case reflect.Int64:
-		fallthrough
-	case reflect.Uint:
-		fallthrough
-	case reflect.Uint8:
-		fallthrough
-	case reflect.Uint16:
-		fallthrough
-	case reflect.Uint32:
-		fallthrough
-	case reflect.Uint64:
-		fallthrough
-	case reflect.Uintptr:
+	case reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+		reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr,
+		reflect.Float32,
+		reflect.Float64:
 		return true
 	default:
 		return false
 	}
 }
 
-func isSignedInt(k reflect.Kind) bool {
+func isSignedIntsKind(k reflect.Kind) bool {
 	switch k {
 	case reflect.Int:
 		fallthrough

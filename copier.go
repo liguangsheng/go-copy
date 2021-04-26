@@ -1,6 +1,7 @@
 package copy
 
 import (
+	"errors"
 	"reflect"
 	"unsafe"
 
@@ -92,5 +93,5 @@ func (c *Copier) copy(dest, src unsafe.Pointer, pair *_pair) error {
 		return sh.Copy(pair.destType, pair.srcType, dest, src)
 	}
 
-	return nil
+	return errors.New("don't know how to copy")
 }

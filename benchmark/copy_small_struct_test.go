@@ -43,7 +43,7 @@ func BenchmarkJSONCopySmall(b *testing.B) {
 	}
 }
 
-func BenchmarkMyCopySmall(b *testing.B) {
+func BenchmarkThisRepoCopySmall(b *testing.B) {
 	var src = TestStructSmallA{}
 	var dest TestStructSmallB
 	cpr := copy.New()
