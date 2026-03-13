@@ -10,5 +10,3 @@
 
 # Output of the go coverage destol, specifically when used with LiteIDE
 *.out
-
-.idea
